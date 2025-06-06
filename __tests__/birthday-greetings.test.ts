@@ -32,6 +32,10 @@ import { ProductionCustomersRepository } from '../src/customers/ProductionCustom
  * * Make a test to ensure that the service fails gracefully if the email sending fails
  * * Make a test to ensure that the service fails gracefully if the repository fails
  *
+ * ITERATION 2 (Always green!)
+ * 
+ * Ensure the email is sent with the correct message
+ * 
  * */
 
 describe('Birthday greetings', () => {
@@ -42,6 +46,8 @@ describe('Birthday greetings', () => {
       new ProductionLogger(),
     )
     service.greetCustomersWithBirthday(new Date())
+
+    // TODO: add assert
   })
 
   it('should send greeting emails to all customers with birthday today', () => {
@@ -55,6 +61,8 @@ describe('Birthday greetings', () => {
     )
 
     service.greetCustomersWithBirthday(new Date())
+
+    // TODO: add assert
   })
 
   it.todo('does not throw if email sender fails', () => {})
