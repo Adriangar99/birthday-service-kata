@@ -5,8 +5,15 @@ import {ProductionLogger} from "../src/logger/ProductionLogger";
 import {Customer} from "../src/customers/Customer";
 import { ProductionCustomersRepository } from '../src/customers/ProductionCustomersRepository';
 import { WithoutCustomersRepository } from './doubles/WithoutCustomersRepository';
-import { NotSendingEmailsSender } from './doubles/NotSendingEmailsSender';
+import { CountingEmailsSender } from './doubles/NotSendingEmailsSender';
 import { NotLogger } from './doubles/NotLogger';
+import { WithCustomersRepository } from './doubles/WithCustomersRepository';
+import { CountingLogger } from './doubles/CountingLogger';
+import { WithOnlyOneCustomerRepository } from './doubles/WithOnlyOneCustomerRepository';
+import { StalkerLogger } from './doubles/ConsoleLogger';
+import { NotDiscountCodeGenerator } from './doubles/NotDiscountCodeGenerator';
+import { TestableDiscountCodeGenerator } from './doubles/TestableDiscountCodeGenerator';
+import { StalkerEmailsSender } from './doubles/StalkerEmailsSender';
 
 
 /*
@@ -44,34 +51,98 @@ import { NotLogger } from './doubles/NotLogger';
 
 describe('Birthday greetings', () => {
   it('does not send greeting emails if no customer has birthday today', () => {
+    const TODAY = new Date("2025-02-14")
     const customerRepository = new WithoutCustomersRepository()
-    const emailSender = new NotSendingEmailsSender()
+    const emailSender = new CountingEmailsSender()
     const logger = new NotLogger()
+    const discountCodeGenerator = new NotDiscountCodeGenerator()
 
     const service = new BirthdayService(
       customerRepository,
       emailSender,
       logger,
+      discountCodeGenerator
     )
-    service.greetCustomersWithBirthday(new Date())
+    service.greetCustomersWithBirthday(TODAY)
 
     expect(emailSender.hasBeenCalledTimes).toBe(0)
   })
 
   it('sends greeting emails to all customers with birthday today', () => {
+    const TODAY = new Date("2025-02-14")
+    const customerRepository = new WithCustomersRepository()
+    const emailSender = new CountingEmailsSender()
+    const logger = new NotLogger()
+    const discountCodeGenerator = new NotDiscountCodeGenerator()
+
     const service = new BirthdayService(
-      new ProductionCustomersRepository([
-        new Customer('John Doe', 'john@example.com', new Date('1990-02-14')),
-        new Customer('Jane Doe', 'jane@example.com', new Date('2005-02-14')),
-      ]),
-      new ProductionEmailSender(),
-      new ProductionLogger(),
+      customerRepository,
+      emailSender,
+      logger,
+      discountCodeGenerator
     )
 
-    service.greetCustomersWithBirthday(new Date())
+    service.greetCustomersWithBirthday(TODAY)
 
-    // TODO: add assert
+    expect(emailSender.hasBeenCalledTimes).toBe(2)
   })
 
-  it.todo("sends a message with the discount code")
+  it("sends the logs of the email sent", () => {
+    const TODAY = new Date("2025-02-14")
+    const customerRepository = new WithCustomersRepository()
+    const emailSender = new CountingEmailsSender()
+    const logger = new CountingLogger()
+    const discountCodeGenerator = new NotDiscountCodeGenerator()
+
+
+    const service = new BirthdayService(
+      customerRepository,
+      emailSender,
+      logger,
+      discountCodeGenerator
+    )
+
+    service.greetCustomersWithBirthday(TODAY)
+
+    expect(logger.hasBeenCalledTimes).toBe(2)
+  })
+
+  it("sends the log of the email sent with the correct message", () => {
+    const TODAY = new Date("2025-02-14")
+    const customerRepository = new WithOnlyOneCustomerRepository()
+    const emailSender = new CountingEmailsSender()
+    const logger = new StalkerLogger()
+    const discountCodeGenerator = new NotDiscountCodeGenerator()
+
+    const service = new BirthdayService(
+      customerRepository,
+      emailSender,
+      logger,
+      discountCodeGenerator
+    )
+
+    service.greetCustomersWithBirthday(TODAY)
+
+    expect(logger.calledWithLevel).toBe('INFO')
+    expect(logger.calledWithMessage).toBe('Email sent to john@example.com')
+  })
+
+  it("sends a message with the discount code", () => {
+    const TODAY = new Date("2025-02-14")
+    const customerRepository = new WithOnlyOneCustomerRepository()
+    const emailSender = new StalkerEmailsSender()
+    const logger = new StalkerLogger()
+    const discountCodeGenerator = new TestableDiscountCodeGenerator()
+
+    const service = new BirthdayService(
+      customerRepository,
+      emailSender,
+      logger,
+      discountCodeGenerator
+    )
+
+    service.greetCustomersWithBirthday(TODAY)
+
+    expect(emailSender.calledWithMessage).contains("TESTABLE_DISCOUNT_CODE")
+  })
 })

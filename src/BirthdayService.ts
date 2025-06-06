@@ -8,21 +8,24 @@ export class BirthdayService {
   private readonly customerRepository: CustomerRepository
   private readonly emailSender: ProductionEmailSender
   private readonly logger: ProductionLogger
+  private readonly discountCodeGenerator: DiscountCodeGenerator
 
   constructor(
     customerRepository: CustomerRepository,
     emailSender: ProductionEmailSender,
     logger: ProductionLogger,
+    discountCodeGenerator: DiscountCodeGenerator,
   ) {
     this.customerRepository = customerRepository
     this.emailSender = emailSender
     this.logger = logger
+    this.discountCodeGenerator = discountCodeGenerator
   }
 
   greetCustomersWithBirthday(today: Date) {
     const customers = this.customerRepository.findWithBirthday(today)
     customers.forEach((customer) => {
-      const discountCode = new DiscountCodeGenerator().generate()
+      const discountCode = this.discountCodeGenerator.generate()
       const template =
         'Happy birthday, {name}! Here is your discount code: {discount}'.replace(
           '{discount}',
