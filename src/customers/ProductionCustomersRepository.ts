@@ -1,6 +1,7 @@
 import { Customer } from './Customer.js'
+import { CustomerRepository } from './CustomerRepository.js'
 
-export class ProductionCustomersRepository {
+export class ProductionCustomersRepository implements CustomerRepository {
   private readonly customers: Customer[]
 
   constructor(customers: Customer[]) {

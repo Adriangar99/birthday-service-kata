@@ -1,16 +1,16 @@
 
-import { ProductionCustomersRepository } from './customers/ProductionCustomersRepository.js'
+import { CustomerRepository } from './customers/CustomerRepository.js'
 import { DiscountCodeGenerator } from './discount/DiscountCodeGenerator.js'
 import { ProductionEmailSender } from './email/ProductionEmailSender.js'
 import { ProductionLogger } from './logger/ProductionLogger.js'
 
 export class BirthdayService {
-  private readonly customerRepository: ProductionCustomersRepository
+  private readonly customerRepository: CustomerRepository
   private readonly emailSender: ProductionEmailSender
   private readonly logger: ProductionLogger
 
   constructor(
-    customerRepository: ProductionCustomersRepository,
+    customerRepository: CustomerRepository,
     emailSender: ProductionEmailSender,
     logger: ProductionLogger,
   ) {

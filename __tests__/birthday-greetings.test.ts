@@ -1,9 +1,12 @@
-import { describe, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import {BirthdayService} from "../src/BirthdayService";
 import {ProductionEmailSender} from "../src/email/ProductionEmailSender";
 import {ProductionLogger} from "../src/logger/ProductionLogger";
 import {Customer} from "../src/customers/Customer";
 import { ProductionCustomersRepository } from '../src/customers/ProductionCustomersRepository';
+import { WithoutCustomersRepository } from './doubles/WithoutCustomersRepository';
+import { NotSendingEmailsSender } from './doubles/NotSendingEmailsSender';
+import { NotLogger } from './doubles/NotLogger';
 
 
 /*
@@ -41,14 +44,18 @@ import { ProductionCustomersRepository } from '../src/customers/ProductionCustom
 
 describe('Birthday greetings', () => {
   it('does not send greeting emails if no customer has birthday today', () => {
+    const customerRepository = new WithoutCustomersRepository()
+    const emailSender = new NotSendingEmailsSender()
+    const logger = new NotLogger()
+
     const service = new BirthdayService(
-      new ProductionCustomersRepository([]),
-      new ProductionEmailSender(),
-      new ProductionLogger(),
+      customerRepository,
+      emailSender,
+      logger,
     )
     service.greetCustomersWithBirthday(new Date())
 
-    // TODO: add assert
+    expect(emailSender.hasBeenCalledTimes).toBe(0)
   })
 
   it('sends greeting emails to all customers with birthday today', () => {
