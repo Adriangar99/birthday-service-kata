@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest'
 import {BirthdayService} from "../src/BirthdayService";
-import {ProductionEmailSender} from "../src/email/ProductionEmailSender";
-import {ProductionLogger} from "../src/logger/ProductionLogger";
-import {Customer} from "../src/customers/Customer";
-import { ProductionCustomersRepository } from '../src/customers/ProductionCustomersRepository';
 import { WithoutCustomersRepository } from './doubles/WithoutCustomersRepository';
 import { CountingEmailsSender } from './doubles/NotSendingEmailsSender';
 import { NotLogger } from './doubles/NotLogger';
@@ -11,7 +7,6 @@ import { WithCustomersRepository } from './doubles/WithCustomersRepository';
 import { CountingLogger } from './doubles/CountingLogger';
 import { WithOnlyOneCustomerRepository } from './doubles/WithOnlyOneCustomerRepository';
 import { StalkerLogger } from './doubles/ConsoleLogger';
-import { NotDiscountCodeGenerator } from './doubles/NotDiscountCodeGenerator';
 import { TestableDiscountCodeGenerator } from './doubles/TestableDiscountCodeGenerator';
 import { StalkerEmailsSender } from './doubles/StalkerEmailsSender';
 
@@ -55,7 +50,7 @@ describe('Birthday greetings', () => {
     const customerRepository = new WithoutCustomersRepository()
     const emailSender = new CountingEmailsSender()
     const logger = new NotLogger()
-    const discountCodeGenerator = new NotDiscountCodeGenerator()
+    const discountCodeGenerator = new TestableDiscountCodeGenerator("")
 
     const service = new BirthdayService(
       customerRepository,
@@ -73,7 +68,7 @@ describe('Birthday greetings', () => {
     const customerRepository = new WithCustomersRepository()
     const emailSender = new CountingEmailsSender()
     const logger = new NotLogger()
-    const discountCodeGenerator = new NotDiscountCodeGenerator()
+    const discountCodeGenerator = new TestableDiscountCodeGenerator("")
 
     const service = new BirthdayService(
       customerRepository,
@@ -92,7 +87,7 @@ describe('Birthday greetings', () => {
     const customerRepository = new WithCustomersRepository()
     const emailSender = new CountingEmailsSender()
     const logger = new CountingLogger()
-    const discountCodeGenerator = new NotDiscountCodeGenerator()
+    const discountCodeGenerator = new TestableDiscountCodeGenerator("")
 
 
     const service = new BirthdayService(
@@ -112,7 +107,7 @@ describe('Birthday greetings', () => {
     const customerRepository = new WithOnlyOneCustomerRepository()
     const emailSender = new CountingEmailsSender()
     const logger = new StalkerLogger()
-    const discountCodeGenerator = new NotDiscountCodeGenerator()
+    const discountCodeGenerator = new TestableDiscountCodeGenerator("")
 
     const service = new BirthdayService(
       customerRepository,
@@ -129,10 +124,11 @@ describe('Birthday greetings', () => {
 
   it("sends a message with the discount code", () => {
     const TODAY = new Date("2025-02-14")
+    const EXPECTED_DISCOUNT_CODE = "TESTABLE_DISCOUNT_CODE"
     const customerRepository = new WithOnlyOneCustomerRepository()
     const emailSender = new StalkerEmailsSender()
     const logger = new StalkerLogger()
-    const discountCodeGenerator = new TestableDiscountCodeGenerator()
+    const discountCodeGenerator = new TestableDiscountCodeGenerator(EXPECTED_DISCOUNT_CODE)
 
     const service = new BirthdayService(
       customerRepository,
@@ -143,6 +139,6 @@ describe('Birthday greetings', () => {
 
     service.greetCustomersWithBirthday(TODAY)
 
-    expect(emailSender.calledWithMessage).contains("TESTABLE_DISCOUNT_CODE")
+    expect(emailSender.calledWithMessage).contains(EXPECTED_DISCOUNT_CODE)
   })
 })
