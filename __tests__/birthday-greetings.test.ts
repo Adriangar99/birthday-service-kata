@@ -26,20 +26,21 @@ import { ProductionCustomersRepository } from '../src/customers/ProductionCustom
  *
  * Maybe you need to apply some refactorings to make the code testable in line with the Small Safe Steps workshop.
  *
+ *   ITERATION 2 (Always green!)
+
  * Enrich the exercise by adding more tests:
  *
  * * Ensure that no email is sent to customer not having birthday today
  * * Make a test to ensure that the service fails gracefully if the email sending fails
  * * Make a test to ensure that the service fails gracefully if the repository fails
  *
- * ITERATION 2 (Always green!)
- * 
+ *
  * Ensure the email is sent with the correct message
  * 
  * */
 
 describe('Birthday greetings', () => {
-  it('should not send greeting emails if no customer has birthday today', () => {
+  it('does not send greeting emails if no customer has birthday today', () => {
     const service = new BirthdayService(
       new ProductionCustomersRepository([]),
       new ProductionEmailSender(),
@@ -50,7 +51,7 @@ describe('Birthday greetings', () => {
     // TODO: add assert
   })
 
-  it('should send greeting emails to all customers with birthday today', () => {
+  it('sends greeting emails to all customers with birthday today', () => {
     const service = new BirthdayService(
       new ProductionCustomersRepository([
         new Customer('John Doe', 'john@example.com', new Date('1990-02-14')),
@@ -65,6 +66,5 @@ describe('Birthday greetings', () => {
     // TODO: add assert
   })
 
-  it.todo('does not throw if email sender fails', () => {})
-  it.todo('does not throw if repository fails', () => {})
+  it.todo("sends a message with the discount code")
 })
